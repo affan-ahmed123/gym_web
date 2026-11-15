@@ -148,6 +148,18 @@ export function NutritionSection({ products }: NutritionSectionProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  // Prevent background scrolling on mobile when bag is open
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isCartOpen]);
+
   // Checkout form fields
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -766,48 +778,48 @@ Hi Coach Ahsan! I have submitted this order from your website. Please confirm av
       {/* ============================================================== */}
       <AnimatePresence>
         {isCartOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end">
-            {/* Backdrop */}
+          <div className="fixed inset-0 z-[250] flex justify-end">
+            {/* Solid Dim Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCartOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
             />
 
-            {/* Slide-in Cart Drawer */}
+            {/* Slide-in Cart Drawer — Opaque & Strictly Above Navbar */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 26, stiffness: 240 }}
-              className="relative w-full max-w-md bg-[#110c11] border-l border-white/15 h-full flex flex-col z-10 shadow-2xl overflow-hidden"
+              className="relative w-full sm:max-w-md bg-[#0e090e] border-l border-white/15 h-full flex flex-col z-20 shadow-[0_0_80px_rgba(0,0,0,0.95)] overflow-hidden"
             >
-              {/* Drawer Header with Prominent Top-Corner Mobile Close Button */}
-              <div className="relative p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-obsidian-950/90">
-                <div className="flex items-center gap-2.5 pr-10 sm:pr-0">
-                  <div className="w-9 h-9 rounded-xl bg-red-600/15 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
+              {/* Drawer Header with Clean Mobile Alignment & Prominent Corner Close Button */}
+              <div className="relative pt-5 sm:pt-5 pb-4 px-4 sm:px-6 border-b border-white/10 flex items-center justify-between bg-[#150d15] shrink-0">
+                <div className="flex items-center gap-3 pr-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-500 shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.3)]">
                     <ShoppingBag className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-condensed text-lg sm:text-xl font-bold uppercase text-white truncate">
-                      Your Shopping Bag
+                    <h3 className="font-condensed text-xl sm:text-2xl font-black uppercase text-white tracking-tight leading-none truncate">
+                      YOUR SHOPPING BAG
                     </h3>
-                    <p className="text-[11px] text-steel-400">
+                    <p className="text-xs text-steel-400 mt-1 font-mono">
                       {totalItems} {totalItems === 1 ? "item" : "items"} selected
                     </p>
                   </div>
                 </div>
 
-                {/* Top-Right Corner Touch-Friendly Cross (X) Button */}
+                {/* Big, Touch-Friendly Cross (X) Button in Top-Right Corner */}
                 <button
                   type="button"
                   onClick={() => setIsCartOpen(false)}
                   aria-label="Close Shopping Bag"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-red-600 active:scale-90 border border-white/20 hover:border-red-500 text-white flex items-center justify-center transition-all shadow-lg shrink-0 cursor-pointer"
+                  className="w-11 h-11 rounded-full bg-white/10 hover:bg-red-600 active:scale-90 border border-white/20 hover:border-red-500 text-white flex items-center justify-center transition-all shadow-xl shrink-0 cursor-pointer"
                 >
-                  <X className="w-5 h-5 stroke-[2.5]" />
+                  <X className="w-6 h-6 stroke-[2.5]" />
                 </button>
               </div>
 
