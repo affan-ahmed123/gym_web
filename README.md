@@ -50,3 +50,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. Import repository into Vercel.
 2. Set Environment Variables (`MONGODB_URI`, `ADMIN_PASSWORD`, Cloudinary keys).
 3. Deploy!
+
