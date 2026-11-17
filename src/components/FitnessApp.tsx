@@ -18,6 +18,7 @@ import { ContactSection } from "./ContactSection";
 import { Footer } from "./Footer";
 import { AdminModals } from "./AdminModals";
 import { LoadingScreen } from "./LoadingScreen";
+import { FitAssistChatbot } from "./FitAssistChatbot";
 
 interface FitnessAppProps {
   initialReviews: ReviewItem[];
@@ -146,6 +147,9 @@ export function FitnessApp({
         />
         <ContactSection selectedGoal={selectedGoal} />
       </main>
+
+      {/* FitAssist AI Chatbot Companion */}
+      <FitAssistChatbot />
 
       <Footer onOpenAdmin={handleAdminTrigger} />
 

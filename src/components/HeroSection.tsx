@@ -29,49 +29,8 @@ export function HeroSection({ heroPhotoUrl = "/ahsan-cutout.png" }: HeroSectionP
 
   const activePhoto = heroPhotoUrl || "/ahsan-cutout.png";
 
-  // Typewriter effect: types ONLY "CERTIFIED PERSONAL TRAINER · UK LEVEL 1 & 2" once, then stays
-  const [charCount, setCharCount] = useState(0);
-
   // Rotating target word index
   const [targetIndex, setTargetIndex] = useState(0);
-
-  const fullLine = useMemo(() => {
-    return TAGLINE.white + TAGLINE.separator + TAGLINE.red;
-  }, []);
-
-  // Dual White and Red text calculation
-  const { whitePart, separatorPart, redPart } = useMemo(() => {
-    const whiteLen = TAGLINE.white.length;
-    const sepLen = TAGLINE.separator.length;
-    const sepEnd = whiteLen + sepLen;
-
-    let w = "";
-    let s = "";
-    let r = "";
-
-    if (charCount <= whiteLen) {
-      w = fullLine.slice(0, charCount);
-    } else if (charCount <= sepEnd) {
-      w = TAGLINE.white;
-      s = fullLine.slice(whiteLen, charCount);
-    } else {
-      w = TAGLINE.white;
-      s = TAGLINE.separator;
-      r = fullLine.slice(sepEnd, charCount);
-    }
-
-    return { whitePart: w, separatorPart: s, redPart: r };
-  }, [charCount, fullLine]);
-
-  // Smooth Typewriter Effect that types once and stays
-  useEffect(() => {
-    if (charCount < fullLine.length) {
-      const timer = setTimeout(() => {
-        setCharCount((prev) => prev + 1);
-      }, 45);
-      return () => clearTimeout(timer);
-    }
-  }, [charCount, fullLine]);
 
   // Rotate headline dynamic word
   useEffect(() => {
@@ -104,11 +63,10 @@ export function HeroSection({ heroPhotoUrl = "/ahsan-cutout.png" }: HeroSectionP
           {/* Left Hero Content */}
           <div className="lg:col-span-6 z-20 pt-2 lg:pt-0">
             {/* 
-              CLEAN UNBOXED KINETIC TYPEWRITER TAGLINE:
-              - No pill/round shape
-              - No start dot
-              - White + Vibrant Red combination
-              - Blinking Red Cursor
+              CLEAN UNBOXED DUAL-TONE TAGLINE (Static & Sharp):
+              - "CERTIFIED PERSONAL TRAINER" in White
+              - " · "
+              - "UK LEVEL 1 & 2" in Vibrant Red
             */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -119,25 +77,18 @@ export function HeroSection({ heroPhotoUrl = "/ahsan-cutout.png" }: HeroSectionP
               <div className="text-[11px] sm:text-xs md:text-sm font-condensed font-black tracking-[0.2em] sm:tracking-[0.25em] uppercase leading-relaxed inline-flex items-center flex-wrap">
                 {/* White Text Part */}
                 <span className="text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.3)]">
-                  {whitePart}
+                  CERTIFIED PERSONAL TRAINER
                 </span>
 
-                {/* Separator Part */}
-                {separatorPart && (
-                  <span className="text-red-500 font-bold mx-1">
-                    {separatorPart}
-                  </span>
-                )}
+                {/* Separator */}
+                <span className="text-red-500 font-bold mx-1.5 sm:mx-2">
+                  ·
+                </span>
 
                 {/* Red Text Part */}
-                {redPart && (
-                  <span className="text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.7)] font-black">
-                    {redPart}
-                  </span>
-                )}
-
-                {/* Blinking Red Typing Cursor */}
-                <span className="w-[2px] h-3.5 sm:h-4 bg-red-500 ml-1.5 inline-block animate-pulse shrink-0 align-middle shadow-[0_0_8px_#ef4444]" />
+                <span className="text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.7)] font-black">
+                  UK LEVEL 1 &amp; 2
+                </span>
               </div>
             </motion.div>
 

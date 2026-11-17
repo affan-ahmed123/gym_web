@@ -62,6 +62,11 @@ declare module "lucide-react" {
   export const Package: LucideIcon;
   export const ShoppingBag: LucideIcon;
   export const Quote: LucideIcon;
+  export const Bot: LucideIcon;
+  export const BotMessageSquare: LucideIcon;
+  export const Send: LucideIcon;
+  export const User: LucideIcon;
+  export const RefreshCw: LucideIcon;
 
   const icons: Record<string, LucideIcon>;
   export default icons;

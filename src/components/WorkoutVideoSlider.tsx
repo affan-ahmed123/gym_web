@@ -133,6 +133,8 @@ export function WorkoutVideoSlider({
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [hasVideoError, setHasVideoError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -143,6 +145,7 @@ export function WorkoutVideoSlider({
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % activeVideos.length);
     setProgress(0);
+    setIsBuffering(true);
   }, [activeVideos.length]);
 
   const handlePrev = useCallback(() => {
@@ -150,11 +153,14 @@ export function WorkoutVideoSlider({
       (prev) => (prev - 1 + activeVideos.length) % activeVideos.length
     );
     setProgress(0);
+    setIsBuffering(true);
   }, [activeVideos.length]);
 
   // Reset video and play when slide changes
   useEffect(() => {
     setProgress(0);
+    setIsBuffering(true);
+    setHasVideoError(false);
     if (videoRef.current) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = isMuted;
@@ -173,25 +179,30 @@ export function WorkoutVideoSlider({
     }
   }, [currentIndex, isPlaying, isMuted]);
 
-  // Auto-advance progress timer (7 seconds per video reel)
+  // Sync progress bar directly to actual video playback
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    const dur = videoRef.current.duration;
+    if (dur && dur > 0) {
+      setProgress((videoRef.current.currentTime / dur) * 100);
+    }
+  };
+
+  // Auto-advance smoothly when the reel finishes playing
+  const handleVideoEnded = () => {
+    handleNext();
+  };
+
+  // Fallback watchdog: if video has no duration or network stalls, advance after slideDuration + 3s
   useEffect(() => {
     if (!isPlaying || isHovered) return;
 
-    const intervalMs = 50;
-    const step = (intervalMs / (slideDuration * 1000)) * 100;
+    const timer = setTimeout(() => {
+      handleNext();
+    }, (slideDuration + 4) * 1000);
 
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          handleNext();
-          return 0;
-        }
-        return prev + step;
-      });
-    }, intervalMs);
-
-    return () => clearInterval(timer);
-  }, [isPlaying, isHovered, slideDuration, handleNext]);
+    return () => clearTimeout(timer);
+  }, [currentIndex, isPlaying, isHovered, slideDuration, handleNext]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -228,15 +239,23 @@ export function WorkoutVideoSlider({
             >
               {/* Outer Glowing Frame */}
               <div className="relative aspect-[9/13.5] sm:aspect-[4/5] rounded-3xl overflow-hidden bg-obsidian-900 border-2 border-white/15 shadow-[0_24px_70px_rgba(0,0,0,0.95)] group">
-                {/* Active Video Player */}
+                {/* Active Video Player with Real Playback Event Sync */}
                 <video
                   ref={videoRef}
                   key={current.videoUrl}
                   autoPlay
-                  loop
                   muted={isMuted}
                   playsInline
                   preload="auto"
+                  onTimeUpdate={handleTimeUpdate}
+                  onEnded={handleVideoEnded}
+                  onWaiting={() => setIsBuffering(true)}
+                  onPlaying={() => setIsBuffering(false)}
+                  onCanPlay={() => setIsBuffering(false)}
+                  onError={() => {
+                    setIsBuffering(false);
+                    setHasVideoError(true);
+                  }}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 >
                   <source src={current.videoUrl} type="video/mp4" />
@@ -245,6 +264,16 @@ export function WorkoutVideoSlider({
                     type="video/quicktime"
                   />
                 </video>
+
+                {/* Sleek Buffering & Loading Indicator */}
+                {isBuffering && !hasVideoError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/45 backdrop-blur-[2px] z-20 pointer-events-none">
+                    <div className="w-10 h-10 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin mb-2 shadow-[0_0_15px_#ef4444]" />
+                    <span className="text-[10px] font-condensed uppercase tracking-widest text-steel-400">
+                      Loading Reel...
+                    </span>
+                  </div>
+                )}
 
                 {/* Top Timing Progress Bar */}
                 <div className="absolute top-0 inset-x-0 h-1.5 bg-black/60 z-30">
@@ -369,17 +398,17 @@ export function WorkoutVideoSlider({
               is engineered around biomechanical safety and progressive overload.
             </p>
 
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-obsidian-900 border border-white/10 flex items-center gap-3">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-obsidian-900 border border-white/10 flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <div className="text-xs sm:text-sm text-steel-300">
+              <div className="text-xs sm:text-sm text-steel-300 min-w-0 flex-1 leading-snug">
                 <strong className="text-white">In-Person Coaching:</strong> Malir Cantt, Karachi &amp; Global Online Video Coaching.
               </div>
             </div>
 
-            {/* Specialties Grid */}
-            <div className="pt-2 grid grid-cols-2 gap-2.5 sm:gap-3.5">
+            {/* Specialties Grid (Responsive 1-col on mobile, 2-col on sm+) */}
+            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 w-full min-w-0">
               {SPECIALTIES.map((spec, idx) => {
                 const Icon = spec.icon;
                 return (
@@ -390,18 +419,18 @@ export function WorkoutVideoSlider({
                     viewport={{ once: false, amount: 0.2 }}
                     transition={{ delay: idx * 0.08 }}
                     whileHover={{ y: -3, borderColor: "rgba(239,68,68,0.4)" }}
-                    className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-obsidian-850 border border-white/10 transition-all hover:bg-obsidian-800"
+                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-obsidian-850 border border-white/10 transition-all hover:bg-obsidian-800 min-w-0 overflow-hidden"
                   >
                     <div
-                      className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${spec.accent}`}
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${spec.accent}`}
                     >
-                      <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <strong className="block font-condensed text-xs sm:text-base uppercase tracking-wide text-white leading-tight">
+                    <div className="min-w-0 flex-1">
+                      <strong className="block font-condensed text-xs sm:text-base uppercase tracking-wide text-white leading-tight truncate">
                         {spec.title}
                       </strong>
-                      <span className="text-[10px] sm:text-xs text-steel-400">
+                      <span className="text-[10px] sm:text-xs text-steel-400 block truncate">
                         {spec.sub}
                       </span>
                     </div>
