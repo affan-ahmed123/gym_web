@@ -180,7 +180,7 @@ _Sent via ahsanhussain.fitness Booking Portal_`;
                 <MapPin className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
                 <div>
                   <strong className="block text-sm font-semibold text-white">
-                    Private Coaching Studio
+                    Home Based Training &amp; Virtual Training
                   </strong>
                   <span className="text-sm text-steel-400">
                     Malir Cantt, Karachi

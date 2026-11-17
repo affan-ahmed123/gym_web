@@ -48,7 +48,7 @@ export function FitnessApp({
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideoItem[]>(
     initialWorkoutVideos
   );
-  const [nutritionProducts, setNutritionProducts] = useState<NutritionProduct[]>([]);
+  const [nutritionProducts, setNutritionProducts] = useState<NutritionProduct[] | null>(null);
   const [selectedGoal, setSelectedGoal] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -137,7 +137,7 @@ export function FitnessApp({
         <WorkoutVideoSlider videos={workoutVideos} />
 
         <ServicesSection onSelectService={handleSelectGoalAndScroll} />
-        <NutritionSection products={nutritionProducts} />
+        <NutritionSection products={nutritionProducts ?? undefined} />
         <QualificationsSection />
         <MissionSection />
         <TestimonialsSection
@@ -187,7 +187,7 @@ export function FitnessApp({
         }
         workoutVideos={workoutVideos}
         onVideosUpdated={(updated) => setWorkoutVideos(updated)}
-        nutritionProducts={nutritionProducts}
+        nutritionProducts={nutritionProducts || []}
         onNutritionUpdated={(updated) => setNutritionProducts(updated)}
         showToast={showToast}
       />

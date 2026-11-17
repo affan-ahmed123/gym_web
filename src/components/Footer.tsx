@@ -14,7 +14,7 @@ export function Footer({ onOpenAdmin }: FooterProps) {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-5 pb-6 border-b border-white/10">
           <div className="flex items-center gap-2.5 text-xs sm:text-sm text-steel-400">
             <MapPin className="w-4 h-4 text-red-500 shrink-0" />
-            <span>Private Coaching Studio · Malir Cantt, Karachi</span>
+            <span>Home Based Training &amp; Virtual Training · Malir Cantt, Karachi</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-condensed uppercase tracking-[0.16em] text-steel-400">

@@ -145,7 +145,7 @@ export function WorkoutVideoSlider({
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % activeVideos.length);
     setProgress(0);
-    setIsBuffering(true);
+    setIsBuffering(false);
   }, [activeVideos.length]);
 
   const handlePrev = useCallback(() => {
@@ -153,18 +153,18 @@ export function WorkoutVideoSlider({
       (prev) => (prev - 1 + activeVideos.length) % activeVideos.length
     );
     setProgress(0);
-    setIsBuffering(true);
+    setIsBuffering(false);
   }, [activeVideos.length]);
 
-  // Reset video and play when slide changes
+  // Reset video and play smoothly when slide changes without unmounting DOM element
   useEffect(() => {
     setProgress(0);
-    setIsBuffering(true);
     setHasVideoError(false);
     if (videoRef.current) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = isMuted;
-      videoRef.current.currentTime = 0;
+      videoRef.current.src = current.videoUrl;
+      videoRef.current.load();
       if (isPlaying) {
         const p = videoRef.current.play();
         if (p !== undefined) {
@@ -177,7 +177,7 @@ export function WorkoutVideoSlider({
         }
       }
     }
-  }, [currentIndex, isPlaying, isMuted]);
+  }, [currentIndex, current.videoUrl, isPlaying, isMuted]);
 
   // Sync progress bar directly to actual video playback
   const handleTimeUpdate = () => {
@@ -192,17 +192,6 @@ export function WorkoutVideoSlider({
   const handleVideoEnded = () => {
     handleNext();
   };
-
-  // Fallback watchdog: if video has no duration or network stalls, advance after slideDuration + 3s
-  useEffect(() => {
-    if (!isPlaying || isHovered) return;
-
-    const timer = setTimeout(() => {
-      handleNext();
-    }, (slideDuration + 4) * 1000);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, isPlaying, isHovered, slideDuration, handleNext]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -242,7 +231,6 @@ export function WorkoutVideoSlider({
                 {/* Active Video Player with Real Playback Event Sync */}
                 <video
                   ref={videoRef}
-                  key={current.videoUrl}
                   autoPlay
                   muted={isMuted}
                   playsInline
@@ -254,7 +242,6 @@ export function WorkoutVideoSlider({
                   onCanPlay={() => setIsBuffering(false)}
                   onError={() => {
                     setIsBuffering(false);
-                    setHasVideoError(true);
                   }}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 >
@@ -361,11 +348,10 @@ export function WorkoutVideoSlider({
                         setProgress(0);
                       }}
                       aria-label={`Go to reel ${idx + 1}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        isActive
+                      className={`h-1.5 rounded-full transition-all duration-300 ${isActive
                           ? "w-8 bg-gradient-to-r from-red-600 via-rose-500 to-red-500 shadow-[0_0_10px_#ef4444]"
                           : "w-2 bg-white/20 hover:bg-white/40"
-                      }`}
+                        }`}
                     />
                   );
                 })}
@@ -403,7 +389,7 @@ export function WorkoutVideoSlider({
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="text-xs sm:text-sm text-steel-300 min-w-0 flex-1 leading-snug">
-                <strong className="text-white">In-Person Coaching:</strong> Malir Cantt, Karachi &amp; Global Online Video Coaching.
+                <strong className="text-white">Home Based Training &amp; Virtual Training:</strong> Malir Cantt, Karachi &amp; Global Online Video Coaching.
               </div>
             </div>
 

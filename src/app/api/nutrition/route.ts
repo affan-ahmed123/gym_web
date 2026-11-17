@@ -84,53 +84,56 @@ const DEFAULT_PRODUCTS: NutritionProduct[] = [
   },
 ];
 
+let memoryProducts: NutritionProduct[] = [...DEFAULT_PRODUCTS];
+
 export async function GET() {
   try {
     await connectToDatabase();
     let docs = await Nutrition.find({}).sort({ createdAt: -1 }).lean();
 
-    // If empty or only has test items with large base64 data, seed default dummy products
-    const hasOnlyBrokenTest =
-      !docs ||
-      docs.length === 0 ||
-      (docs.length <= 1 &&
-        docs.some(
-          (d: any) =>
-            typeof d.imageUrl === "string" && d.imageUrl.startsWith("data:")
-        ));
-
-    if (hasOnlyBrokenTest) {
-      if (docs && docs.length > 0) {
-        await Nutrition.deleteMany({
-          imageUrl: { $regex: "^data:" },
-        });
+    // If MongoDB is connected but has no documents yet, seed default rich products into the database
+    if (!docs || docs.length === 0) {
+      try {
+        await Nutrition.insertMany(
+          DEFAULT_PRODUCTS.map((p) => ({
+            title: p.title,
+            category: p.category,
+            price: p.price,
+            servingSize: p.servingSize,
+            description: p.description,
+            imageUrl: p.imageUrl,
+            badge: p.badge,
+            featured: p.featured,
+          }))
+        );
+        docs = await Nutrition.find({}).sort({ createdAt: -1 }).lean();
+      } catch (seedErr) {
+        console.warn("Could not seed default nutrition into MongoDB:", seedErr);
       }
-
-      // Return default rich products
-      return NextResponse.json({
-        products: DEFAULT_PRODUCTS,
-        source: "defaults",
-      });
     }
 
-    const products: NutritionProduct[] = docs.map((d: any) => ({
-      id: d._id.toString(),
-      title: d.title,
-      category: d.category,
-      price: d.price,
-      servingSize: d.servingSize || "",
-      description: d.description,
-      imageUrl: d.imageUrl,
-      badge: d.badge || "",
-      featured: Boolean(d.featured),
-      createdAt: d.createdAt ? new Date(d.createdAt).getTime() : Date.now(),
-    }));
+    if (docs && docs.length > 0) {
+      const products: NutritionProduct[] = docs.map((d: any) => ({
+        id: d._id.toString(),
+        title: d.title,
+        category: d.category,
+        price: d.price,
+        servingSize: d.servingSize || "",
+        description: d.description,
+        imageUrl: d.imageUrl,
+        badge: d.badge || "",
+        featured: Boolean(d.featured),
+        createdAt: d.createdAt ? new Date(d.createdAt).getTime() : Date.now(),
+      }));
+      memoryProducts = [...products];
+      return NextResponse.json({ products, source: "mongodb" });
+    }
 
-    return NextResponse.json({ products, source: "mongodb" });
+    return NextResponse.json({ products: memoryProducts, source: "memory" });
   } catch (err) {
     console.error("[api/nutrition GET] error:", err);
     return NextResponse.json({
-      products: DEFAULT_PRODUCTS,
+      products: memoryProducts,
       source: "fallback",
     });
   }
@@ -211,28 +214,62 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Product ID is required." }, { status: 400 });
     }
 
-    await connectToDatabase();
+    // Always filter out from in-memory store
+    memoryProducts = memoryProducts.filter((p) => p.id !== id);
 
-    // If ID starts with 'nutr-', it's a default item that can be acknowledged as removed
-    if (!id.startsWith("nutr-")) {
-      await Nutrition.findByIdAndDelete(id);
+    try {
+      await connectToDatabase();
+
+      const count = await Nutrition.countDocuments();
+      if (count === 0) {
+        // If MongoDB was not populated, seed everything except the deleted product
+        const toSeed = DEFAULT_PRODUCTS.filter((p) => p.id !== id).map((p) => ({
+          title: p.title,
+          category: p.category,
+          price: p.price,
+          servingSize: p.servingSize,
+          description: p.description,
+          imageUrl: p.imageUrl,
+          badge: p.badge,
+          featured: p.featured,
+        }));
+        if (toSeed.length > 0) {
+          await Nutrition.insertMany(toSeed);
+        }
+      } else {
+        // Try deleting by MongoDB ObjectId or matching title
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          await Nutrition.findByIdAndDelete(id);
+        } else {
+          const target = DEFAULT_PRODUCTS.find((p) => p.id === id);
+          if (target) {
+            await Nutrition.deleteOne({ title: target.title });
+          } else {
+            await Nutrition.findByIdAndDelete(id).catch(() => {});
+          }
+        }
+      }
+
+      const docs = await Nutrition.find({}).sort({ createdAt: -1 }).lean();
+      const products: NutritionProduct[] = docs.map((d: any) => ({
+        id: d._id.toString(),
+        title: d.title,
+        category: d.category,
+        price: d.price,
+        servingSize: d.servingSize || "",
+        description: d.description,
+        imageUrl: d.imageUrl,
+        badge: d.badge || "",
+        featured: Boolean(d.featured),
+        createdAt: d.createdAt ? new Date(d.createdAt).getTime() : Date.now(),
+      }));
+
+      memoryProducts = [...products];
+      return NextResponse.json({ success: true, products });
+    } catch {
+      // Return in-memory list if MongoDB is not reachable
+      return NextResponse.json({ success: true, products: memoryProducts });
     }
-
-    const docs = await Nutrition.find({}).sort({ createdAt: -1 }).lean();
-    const products: NutritionProduct[] = docs.map((d: any) => ({
-      id: d._id.toString(),
-      title: d.title,
-      category: d.category,
-      price: d.price,
-      servingSize: d.servingSize || "",
-      description: d.description,
-      imageUrl: d.imageUrl,
-      badge: d.badge || "",
-      featured: Boolean(d.featured),
-      createdAt: d.createdAt ? new Date(d.createdAt).getTime() : Date.now(),
-    }));
-
-    return NextResponse.json({ success: true, products });
   } catch (err: any) {
     console.error("[api/nutrition DELETE] error:", err);
     return NextResponse.json(

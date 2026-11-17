@@ -24,7 +24,7 @@ import {
 import type { NutritionProduct } from "@/types/fitness";
 
 interface NutritionSectionProps {
-  products: NutritionProduct[];
+  products?: NutritionProduct[];
 }
 
 interface CartItem {
@@ -134,7 +134,10 @@ function formatPrice(amount: number): string {
 
 export function NutritionSection({ products }: NutritionSectionProps) {
   const activeProducts = useMemo(() => {
-    return products && products.length > 0 ? products : FALLBACK_PRODUCTS;
+    if (products !== undefined && products !== null) {
+      return products;
+    }
+    return FALLBACK_PRODUCTS;
   }, [products]);
 
   const [activeCategory, setActiveCategory] = useState("All");

@@ -59,7 +59,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 
 const QUICK_PROMPTS = [
   "Book a Free Session",
-  "1-on-1 Studio in Malir Cantt",
+  "Home Based & Virtual Training",
   "Recommended Supplements",
   "Coach Ahsan Credentials",
   "Fat Loss vs Muscle Gain",
@@ -102,7 +102,7 @@ function generateBotResponse(input: string): {
     };
   }
 
-  // 2. Location / Studio / Address / Where / Malir Cantt
+  // 2. Location / Home Based / Virtual / Malir Cantt
   if (
     query.includes("location") ||
     query.includes("where") ||
@@ -112,21 +112,24 @@ function generateBotResponse(input: string): {
     query.includes("malir") ||
     query.includes("cantt") ||
     query.includes("karachi") ||
+    query.includes("home") ||
+    query.includes("virtual") ||
+    query.includes("online") ||
     query.includes("kaha") ||
     query.includes("place")
   ) {
     return {
-      text: "📍 **In-Person Coaching Studio:**\nCoach Ahsan coaches at a private personal training studio located in **Malir Cantt, Karachi** (Opposite KIMS · Near CMH).\n\n🌐 **Global Online Coaching:**\nIf you live outside Karachi or abroad, Coach Ahsan also offers bespoke 1-on-1 Online Video Coaching with weekly check-ins and form analysis.",
+      text: "📍 **Home Based Training & Virtual Training:**\nCoach Ahsan provides dedicated **Home Based Personal Training** across Karachi and **Virtual 1-on-1 Training** worldwide with personalized programming, form mastery, and nutrition check-ins.\n\nBase Location: **Malir Cantt, Karachi** (Opposite KIMS · Near CMH).",
       actions: [
         {
-          label: "Get Directions / Contact",
+          label: "Get Details / Contact",
           actionType: "scroll",
           target: "contact",
         },
         {
           label: "Inquire on WhatsApp",
           actionType: "whatsapp",
-          target: "https://wa.me/923262371372?text=Hi%20Coach%20Ahsan,%20what%20are%20your%20studio%20timings%20in%20Malir%20Cantt?",
+          target: "https://wa.me/923262371372?text=Hi%20Coach%20Ahsan,%20I%20want%20to%20inquire%20about%20Home%20Based%20and%20Virtual%20Training.",
         },
       ],
     };
@@ -285,7 +288,7 @@ function generateBotResponse(input: string): {
     query.includes("kitne")
   ) {
     return {
-      text: "💳 **Coaching Packages & Pricing:**\n\nPackages depend on training frequency (3x or 5x weekly private sessions) and whether you choose **In-Person Studio Coaching in Malir Cantt** or **Global Online Coaching**.\n\nAll programs include custom workout plans, macro targets, and continuous progress tracking. Contact Coach Ahsan for the exact package tailored to your goals!",
+      text: "💳 **Coaching Packages & Pricing:**\n\nPackages depend on training frequency (3x or 5x weekly private sessions) and whether you choose **Home Based Training in Karachi** or **Global Virtual Training**.\n\nAll programs include custom workout plans, macro targets, and continuous progress tracking. Contact Coach Ahsan for the exact package tailored to your goals!",
       actions: [
         {
           label: "Get Pricing on WhatsApp",
@@ -311,7 +314,7 @@ function generateBotResponse(input: string): {
     query.includes("email")
   ) {
     return {
-      text: "📞 **Direct Contact Details for Coach Ahsan:**\n\n• **WhatsApp & Direct Call:** +92 326 2371372\n• **Email:** 02ahsanhussain@gmail.com\n• **Studio:** Malir Cantt, Karachi (Opposite KIMS, near CMH)\n• **Hours:** 6:00 AM – 10:00 PM (Monday to Saturday)",
+      text: "📞 **Direct Contact Details for Coach Ahsan:**\n\n• **WhatsApp & Direct Call:** +92 326 2371372\n• **Email:** 02ahsanhussain@gmail.com\n• **Location:** Malir Cantt, Karachi (Home Based & Virtual Training)\n• **Hours:** 6:00 AM – 10:00 PM (Monday to Saturday)",
       actions: [
         {
           label: "Open WhatsApp Chat",
@@ -437,33 +440,44 @@ export function FitAssistChatbot() {
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          aria-label="Open FitAssist AI Chatbot"
+          aria-label={isOpen ? "Close FitAssist AI Chatbot" : "Open FitAssist AI Chatbot"}
           className="group relative flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded-full bg-gradient-to-r from-[#170e17] via-[#1f111f] to-[#120a12] border-2 border-red-500/50 hover:border-red-500 text-white font-condensed font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_12px_35px_rgba(220,38,38,0.45)] hover:shadow-[0_16px_45px_rgba(220,38,38,0.7)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-xl"
         >
           {/* Animated Pulsing Ring */}
           <span className="absolute -inset-0.5 rounded-full bg-red-600/30 blur-sm group-hover:bg-red-600/50 transition-all animate-pulse pointer-events-none" />
 
-          {/* Bot Icon with glowing badge */}
-          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-600/25 border border-red-500/60 flex items-center justify-center text-red-400 shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.4)]">
-            <Bot className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
-            {/* Live Green Online Dot */}
-            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#070507] animate-ping" />
-            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#070507]" />
-          </div>
+          {isOpen ? (
+            /* Explicit Cross Icon when Chatbot is open */
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-600 border border-red-400 flex items-center justify-center text-white shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.5)]">
+                <X className="w-4 h-4 stroke-[3]" />
+              </div>
+              <span className="font-condensed font-black text-white text-xs sm:text-sm tracking-wider">
+                CLOSE
+              </span>
+            </div>
+          ) : (
+            /* Bot Icon without green sync dot */
+            <>
+              <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-600/25 border border-red-500/60 flex items-center justify-center text-red-400 shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.4)]">
+                <Bot className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
+              </div>
 
-          <div className="flex flex-col items-start leading-none relative z-10">
-            <span className="font-condensed font-black text-white text-xs sm:text-sm tracking-wider flex items-center gap-1">
-              FITASSIST
-              <Sparkles className="w-3 h-3 text-red-400 inline" />
-            </span>
-            <span className="text-[9px] text-steel-400 font-normal mt-0.5 hidden sm:inline">
-              Coach Ahsan AI
-            </span>
-          </div>
+              <div className="flex flex-col items-start leading-none relative z-10">
+                <span className="font-condensed font-black text-white text-xs sm:text-sm tracking-wider flex items-center gap-1">
+                  FITASSIST
+                  <Sparkles className="w-3 h-3 text-red-400 inline" />
+                </span>
+                <span className="text-[9px] text-steel-400 font-normal mt-0.5 hidden sm:inline">
+                  Coach Ahsan AI
+                </span>
+              </div>
 
-          {/* Unread indicator */}
-          {hasUnread && !isOpen && (
-            <span className="ml-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-bounce" />
+              {/* Unread indicator */}
+              {hasUnread && (
+                <span className="ml-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-bounce" />
+              )}
+            </>
           )}
         </button>
       </div>
@@ -473,63 +487,72 @@ export function FitAssistChatbot() {
       {/* ============================================================== */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.94 }}
-            transition={{ type: "spring", damping: 24, stiffness: 260 }}
-            className="fixed z-[260] flex flex-col bg-[#0d090d]/98 backdrop-blur-2xl border border-red-500/35 shadow-[0_25px_70px_rgba(0,0,0,0.95)] overflow-hidden
-              inset-x-3 bottom-4 top-20 sm:inset-auto sm:bottom-24 sm:left-6 sm:w-[410px] sm:h-[580px] sm:max-h-[82vh] rounded-3xl"
-          >
-            {/* Ambient Background Glow */}
-            <div className="pointer-events-none absolute -top-20 -left-20 w-52 h-52 rounded-full bg-red-600/15 blur-[90px]" />
-            <div className="pointer-events-none absolute -bottom-20 -right-20 w-52 h-52 rounded-full bg-rose-600/15 blur-[90px]" />
+          <>
+            {/* Mobile Backdrop for easy dismissal by tapping outside */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[255] sm:hidden"
+              aria-hidden="true"
+            />
 
-            {/* --- Chat Header --- */}
-            <div className="relative px-4 py-3.5 sm:px-5 sm:py-4 border-b border-white/10 bg-[#140c14] flex items-center justify-between shrink-0 z-10">
-              <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
-                  <Bot className="w-5 h-5" />
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#140c14]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-condensed text-base sm:text-lg font-black uppercase text-white tracking-wider leading-none">
-                      FitAssist
-                    </h3>
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase bg-red-600/30 text-red-400 border border-red-500/40">
-                      AI Guide
-                    </span>
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.94 }}
+              transition={{ type: "spring", damping: 24, stiffness: 260 }}
+              className="fixed z-[260] flex flex-col bg-[#0d090d]/98 backdrop-blur-2xl border border-red-500/35 shadow-[0_25px_70px_rgba(0,0,0,0.95)] overflow-hidden
+                inset-x-3 bottom-4 top-20 sm:inset-auto sm:bottom-24 sm:left-6 sm:w-[410px] sm:h-[580px] sm:max-h-[82vh] rounded-3xl"
+            >
+              {/* Ambient Background Glow */}
+              <div className="pointer-events-none absolute -top-20 -left-20 w-52 h-52 rounded-full bg-red-600/15 blur-[90px]" />
+              <div className="pointer-events-none absolute -bottom-20 -right-20 w-52 h-52 rounded-full bg-rose-600/15 blur-[90px]" />
+
+              {/* --- Chat Header --- */}
+              <div className="relative px-4 py-3.5 sm:px-5 sm:py-4 border-b border-white/10 bg-[#140c14] flex items-center justify-between shrink-0 z-10">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
+                    <Bot className="w-5 h-5" />
                   </div>
-                  <p className="text-[11px] text-steel-400 mt-0.5 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Online · Coach Ahsan Hussain
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-condensed text-base sm:text-lg font-black uppercase text-white tracking-wider leading-none">
+                        FitAssist
+                      </h3>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase bg-red-600/30 text-red-400 border border-red-500/40">
+                        AI Guide
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-steel-400 mt-0.5">
+                      Coach Ahsan Hussain · Fitness AI
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons: Clear & Prominent Cross Close Button */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleClearChat}
+                    title="Clear conversation"
+                    aria-label="Clear chat"
+                    className="p-2 rounded-xl text-steel-400 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    title="Close FitAssist"
+                    aria-label="Close chat"
+                    className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 active:scale-90 border border-red-400 text-white flex items-center justify-center transition-all shadow-[0_0_15px_rgba(239,68,68,0.5)] cursor-pointer shrink-0"
+                  >
+                    <X className="w-5 h-5 stroke-[2.5]" />
+                  </button>
                 </div>
               </div>
-
-              {/* Action Buttons: Clear & Close */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleClearChat}
-                  title="Clear conversation"
-                  aria-label="Clear chat"
-                  className="p-2 rounded-xl text-steel-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  title="Close FitAssist"
-                  aria-label="Close chat"
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-red-600 active:scale-90 border border-white/15 hover:border-red-500 text-white flex items-center justify-center transition-all shadow-md"
-                >
-                  <X className="w-4 h-4 stroke-[2.5]" />
-                </button>
-              </div>
-            </div>
 
             {/* --- Messages Body (Scrollable) --- */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 text-xs sm:text-sm no-scrollbar relative z-10">
@@ -673,6 +696,7 @@ export function FitAssistChatbot() {
               </div>
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

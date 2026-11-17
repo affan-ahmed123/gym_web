@@ -463,7 +463,11 @@ export function AdminModals({
       });
       const data = await res.json();
       if (!res.ok) throw new Error("Delete failed");
-      onNutritionUpdated(data.products);
+      if (Array.isArray(data.products)) {
+        onNutritionUpdated(data.products);
+      } else {
+        onNutritionUpdated(nutritionProducts.filter((p) => p.id !== id));
+      }
       showToast("Nutrition product deleted successfully.");
     } catch {
       showToast("Failed to delete product.");
